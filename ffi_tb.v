@@ -9,7 +9,6 @@ module tb_ff_inv_seq_255;
     reg [509:0] prod;
     reg [255:0] rem;
     
-    // Instantiate the inversion module (with no start signal)
     ff_inv_seq_255 uut (
         .clk(clk),
         .rst(rst),
@@ -19,9 +18,8 @@ module tb_ff_inv_seq_255;
     );
     
     parameter [254:0] P_255 = ({1'b1, 255'b0} - 19);
-    parameter [255:0] P     = {1'b0, P_255};  // 256-bit representation of P
+    parameter [255:0] P     = {1'b0, P_255};  
 
-    // Clock generation: 10 ns period.
     initial begin
         clk = 0;
         forever #5 clk = ~clk;
@@ -34,11 +32,9 @@ module tb_ff_inv_seq_255;
         rst = 0;
         #10;
         
-        // First test: set a to 18271.
         a = 255'd18271;
         $display("Test 1: Applying a = %d", a);
         
-        // Wait for valid to be asserted.
         wait(valid == 1);
         #5;  // Ensure outputs are stable.
         
@@ -54,18 +50,14 @@ module tb_ff_inv_seq_255;
         else
             $display("  Inversion incorrect: FAILED!\n");
         
-        // Wait a few cycles.
         #20;
         
-        // Force a change: first drive a to 0 for one cycle.
         a = 255'd0;
         #10;
         
-        // Second test: apply new value a = 54321.
         a = 255'd54321;
         $display("Test 2: Changing input to a = %d", a);
         
-        // Wait for valid to be asserted again.
         wait(valid == 1);
         #5; // Small delay
         

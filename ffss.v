@@ -1,9 +1,12 @@
-module ffss(clk, rst, start, a, b, out, done);
+module ffss(clk, rst, start, a_i, b_i, out, done);
     input clk, rst, start;
-    input [255:0] a, b;
-    output [255:0] out;
+    input [254:0] a_i, b_i;
+    output [254:0] out;
     output reg done;
 
+
+    wire [255:0] a = {1'b0, a_i}; 
+    wire [255:0] b = {1'b0, b_i}; 
     parameter [255:0] p = {1'b1, 255'b0} - 19;
 
     parameter CYCLE_1 = 0, CYCLE_2 = 1, CYCLE_3 = 2, CYCLE_4 = 3, CYCLE_5 = 4, CYCLE_6 = 5;
@@ -103,6 +106,6 @@ module ffss(clk, rst, start, a, b, out, done);
         end
     end
 
-    assign out = (bo_out) ? s : d;
+    assign out = (bo_out) ? s[254:0] : d[254:0];
 
 endmodule

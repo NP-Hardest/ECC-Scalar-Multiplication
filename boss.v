@@ -22,13 +22,13 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
     reg [254:0] a_mul, b_mul;
     reg [254:0] a_inv;
 
-    wire [255:0] add_res;
+    wire [254:0] add_res;
     wire [254:0]  sub_res, mul_res, inv_res;
     wire add_valid, sub_valid, mul_valid, inv_valid;    
 
 
     ffm multiplier(clk, rst, start_mul, a_mul, b_mul, mul_res, mul_valid);
-    ffaa adder(clk, rst, start_add, {1'b0,a_add}, {1'b0,b_add}, add_res, add_valid);
+    ffa adder(clk, rst, start_add, a_add, b_add, add_res, add_valid);
     ffs subtractor(clk, rst, start_sub, a_sub, b_sub, sub_res, sub_valid);
     ffi inversion(clk, rst, a_inv, inv_res, inv_valid);
 
@@ -121,7 +121,7 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
                     start_add <= 0;   
                     start_sub <= 0;   
                     if (add_valid) begin  
-                        t1 <= add_res[254:0];
+                        t1 <= add_res;
                         t2 <= sub_res;
                         state <= STEP_6;
                     end
@@ -141,7 +141,7 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
                     start_add<= 0; 
                     start_sub <= 0;  
                     if (add_valid) begin  
-                        t3 <= add_res[254:0];
+                        t3 <= add_res;
                         t4 <= sub_res;
                         state <= STEP_7A;
                     end
@@ -223,7 +223,7 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
                 WAIT_STEP_9B: begin
                     start_add<= 0; 
                     if (add_valid) begin  
-                        t10 <= add_res[254:0];
+                        t10 <= add_res;
                         state <= STEP_10;
                     end
                 end
@@ -293,7 +293,7 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
                     start_add<= 0;  
                     if (mul_valid) begin  
                         X2 <= mul_res;
-                        t14 <= add_res[254:0];
+                        t14 <= add_res;
                         state <= STEP_13A;
                     end
                 end

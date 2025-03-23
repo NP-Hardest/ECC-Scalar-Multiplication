@@ -15,6 +15,4 @@ module simple_subtractor(a, b, cin, sum, cout);
 
     assign {cout, sum} = a - b - cin;               
     
-    //  ------------------>>>>> UNCOMMENT SIMPLE ADDER AND SUBTRACTOR IF
-    //                                                     YOU WANT TO RUN IT INDIVIDUALLY. IF RUNNING WITH BOSS.V, KEEP COMMENTED
 endmodule

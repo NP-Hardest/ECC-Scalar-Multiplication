@@ -1,7 +1,6 @@
 `timescale 1ns/1ps
 module tb_ffs;
 
-    // Testbench signals
     reg         clk;
     reg         rst;
     reg         start;
@@ -10,7 +9,6 @@ module tb_ffs;
     wire [254:0] result;
     wire        valid;
 
-    // Instantiate the device under test (DUT)
     ffs uut (
         .clk(clk),
         .rst(rst),
@@ -21,34 +19,27 @@ module tb_ffs;
         .valid(valid)
     );
 
-    // Clock generation: 10 ns period
     initial begin
         clk = 0;
         forever #5 clk = ~clk;
     end
 
-    // Stimulus block
     initial begin
-        // Initialize inputs
         rst   = 1;
         start = 0;
         a     = 0;
         b     = 0;
-        #12;            // Wait a few cycles with reset asserted
+        #12;         
 
-        rst = 0;       // Release reset
-
-        // Test case 1: a >= b
-        // Example: a = 10, b = 5; Expected result: 5
+        rst = 0;      
         a = 45965849458578823337285628114947185621072782472466027602082789798859530730302;
         b = 45965849458578823337785628114947185621072782472466027602082789798859530730301;
         start = 1;
-        #10;           // Provide one clock cycle for start signal
+        #10;          
         start = 0;
-        #20;           // Wait to capture the result
+        #20;        
 
             $display("Test completed at time %0t", $time);
-    // $display("Clock cycles taken: %d", count);
     $display("Input a : %d", a);
     $display("Input b : %d", b);
     $display("Output  : %d", result);
