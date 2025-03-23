@@ -24,7 +24,7 @@ module ffi(
 
     wire finish = (u == 256'd1) || (v == 256'd1);
 
-`    always @(posedge clk or posedge rst) begin
+    always @(posedge clk or posedge rst) begin
         if (rst) begin
             state  <= IDLE;
             valid  <= 1'b0;

@@ -6,7 +6,6 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
 
     output reg done;
 
-
     wire [255:0] k_padded = {1'b0, k};
 
     reg start_mul;
@@ -23,13 +22,13 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
     reg [254:0] a_mul, b_mul;
     reg [254:0] a_inv;
 
-
-    wire [254:0] add_res, sub_res, mul_res, inv_res;
+    wire [255:0] add_res;
+    wire [254:0]  sub_res, mul_res, inv_res;
     wire add_valid, sub_valid, mul_valid, inv_valid;    
 
 
     ffm multiplier(clk, rst, start_mul, a_mul, b_mul, mul_res, mul_valid);
-    ffa adder(clk, rst, start_add, a_add, b_add, add_res, add_valid);
+    ffaa adder(clk, rst, start_add, {1'b0,a_add}, {1'b0,b_add}, add_res, add_valid);
     ffs subtractor(clk, rst, start_sub, a_sub, b_sub, sub_res, sub_valid);
     ffi inversion(clk, rst, a_inv, inv_res, inv_valid);
 
@@ -75,6 +74,7 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
     reg c;
 
     always @ (posedge clk or posedge rst) begin
+        // $display("%d", state);
         if(rst) begin
             state <= STEP_3;
             X1 <= x_p;
@@ -120,8 +120,8 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
                 WAIT_STEP_5: begin
                     start_add <= 0;   
                     start_sub <= 0;   
-                    if (add_valid && sub_valid) begin  
-                        t1 <= add_res;
+                    if (add_valid) begin  
+                        t1 <= add_res[254:0];
                         t2 <= sub_res;
                         state <= STEP_6;
                     end
@@ -140,8 +140,8 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
                 WAIT_STEP_6: begin
                     start_add<= 0; 
                     start_sub <= 0;  
-                    if (add_valid && sub_valid) begin  
-                        t3 <= add_res;
+                    if (add_valid) begin  
+                        t3 <= add_res[254:0];
                         t4 <= sub_res;
                         state <= STEP_7A;
                     end
@@ -223,7 +223,7 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
                 WAIT_STEP_9B: begin
                     start_add<= 0; 
                     if (add_valid) begin  
-                        t10 <= add_res;
+                        t10 <= add_res[254:0];
                         state <= STEP_10;
                     end
                 end
@@ -293,7 +293,7 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
                     start_add<= 0;  
                     if (mul_valid) begin  
                         X2 <= mul_res;
-                        t14 <= add_res;
+                        t14 <= add_res[254:0];
                         state <= STEP_13A;
                     end
                 end

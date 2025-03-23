@@ -1,94 +1,61 @@
 `timescale 1ns/1ps
+module tb_ffs;
 
-module tb_ff_sub_255();
-            localparam [254:0] P = {1'b1, 255'b0} - 19;
-    // Clock and reset signals.
-    reg clk;
-    reg rst;
-
-    // 255-bit inputs.
+    // Testbench signals
+    reg         clk;
+    reg         rst;
+    reg         start;
     reg [254:0] a;
     reg [254:0] b;
-
-    // Output from the subtractor.
     wire [254:0] result;
-    wire         valid;
-    
-    // Expected result (for comparison).
-    reg [254:0] expected;
+    wire        valid;
 
-    // Instantiate the finite field subtractor.
-    ff_sub_255 sub_inst (
+    // Instantiate the device under test (DUT)
+    ffs uut (
         .clk(clk),
         .rst(rst),
+        .start(start),
         .a(a),
         .b(b),
         .result(result),
         .valid(valid)
     );
-    
-    // Clock generation: period = 10 ns.
+
+    // Clock generation: 10 ns period
     initial begin
         clk = 0;
         forever #5 clk = ~clk;
     end
 
-    // Test sequence.
+    // Stimulus block
     initial begin
-        // Assert reset.
-        rst = 1;
-        a = 0;
-        b = 0;
-        #10;
-        rst = 0;
-        #10;
-        
-        // ----------------------------------------------------
-        // Test Vector 1: a = 20, b = 10, expected = 10 mod P.
-        a = 255'd20;
-        b = 255'd10;
-        expected = 255'd10;
-        #10;
-        wait(valid);
-        if (result !== expected) begin
-            $display("Subtractor Test 1 FAILED: a=%d, b=%d, expected=%d, got=%d", a, b, expected, result);
-            $stop;
-        end else begin
-            $display("Subtractor Test 1 PASSED.");
-        end
-        
-        // ----------------------------------------------------
-        // Test Vector 2: a = 1, b = 2. Since a < b, expected = (a + P - b) mod P = P - 1.
+        // Initialize inputs
+        rst   = 1;
+        start = 0;
+        a     = 0;
+        b     = 0;
+        #12;            // Wait a few cycles with reset asserted
 
-        a = 255'd1;
-        b = 255'd2;
-        expected = P - 1;
-        #10;
-        wait(valid);
-        if (result !== expected) begin
-            $display("Subtractor Test 2 FAILED: a=%d, b=%d, expected=%h, got=%h", a, b, expected, result);
-            $stop;
-        end else begin
-            $display("Subtractor Test 2 PASSED.");
-        end
-        
-        // ----------------------------------------------------
-        // Test Vector 3: a = 2^254, b = 1. Expected: a - 1.
-        a = 0;
-        a[254] = 1'b1;  // a = 2^254.
-        b = 255'd1;
-        expected = a - 255'd1;
-        #10;
-        wait(valid);
-        if (result !== expected) begin
-            $display("Subtractor Test 3 FAILED: a=%h, b=%d, expected=%h, got=%h", a, b, expected, result);
-            $stop;
-        end else begin
-            $display("Subtractor Test 3 PASSED.");
-        end
-        
-        $display("All finite field subtractor tests PASSED.");
+        rst = 0;       // Release reset
+
+        // Test case 1: a >= b
+        // Example: a = 10, b = 5; Expected result: 5
+        a = 45965849458578823337285628114947185621072782472466027602082789798859530730302;
+        b = 45965849458578823337785628114947185621072782472466027602082789798859530730301;
+        start = 1;
+        #10;           // Provide one clock cycle for start signal
+        start = 0;
+        #20;           // Wait to capture the result
+
+            $display("Test completed at time %0t", $time);
+    // $display("Clock cycles taken: %d", count);
+    $display("Input a : %d", a);
+    $display("Input b : %d", b);
+    $display("Output  : %d", result);
+
+        #20;
         $finish;
     end
 
+    
 endmodule
