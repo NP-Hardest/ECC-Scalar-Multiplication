@@ -37,10 +37,12 @@ module ffa(clk, rst, start, a_i, b_i, out, done);
             case(state) 
                 CYCLE_1: begin
                     done <= 0;
-                    a_in <= a[63:0];
-                    b_in <= b[63:0];
-                    c_in <= 0;
-                    if(start) state <= CYCLE_2;
+                    if(start) begin
+                        a_in <= a[63:0];
+                        b_in <= b[63:0];
+                        c_in <= 0;
+                         state <= CYCLE_2;
+                    end
                 end
 
                 CYCLE_2: begin

@@ -44,11 +44,12 @@ module ffss(clk, rst, start, a_i, b_i, out, done);
             case(state)
                 CYCLE_1: begin
                     done <= 0;
-                    a_in <= a[63:0];
-                    b_in <= b[63:0];
-                    bo_in <= 0;  // no borrow initially
-                    if(start)
+                    if(start) begin
+                        a_in <= a[63:0];
+                        b_in <= b[63:0];
+                        bo_in <= 0;  // no borrow initially
                         state <= CYCLE_2;
+                    end
                 end
 
                 CYCLE_2: begin
