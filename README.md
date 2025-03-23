@@ -30,6 +30,8 @@ This repository contains a Verilog implementation of scalar multiplication for *
 1. Run any of the files (say `ffm.v` with its testbench `ffm_tb.v` for multiplier) to observe results for individual arithmetic modules.
 2. Run `boss.v` with its testbench `boss_tb.v` to observe the scalar multiplication module.
 
+3. Additionaly, the python script `test.py` implements the Montgomery Ladder. You can use it to verify the results from the verilog modules.
+
 ### **Feedback**  
 
 Feel free to reach out or initiate a pull request if you find any issues!
