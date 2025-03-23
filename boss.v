@@ -29,7 +29,7 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
 
     ffm multiplier(clk, rst, start_mul, a_mul, b_mul, mul_res, mul_valid);
     ffa adder(clk, rst, start_add, a_add, b_add, add_res, add_valid);
-    ffss subtractor(clk, rst, start_sub, a_sub, b_sub, sub_res, sub_valid);
+    ffs subtractor(clk, rst, start_sub, a_sub, b_sub, sub_res, sub_valid);
     ffi inversion(clk, rst, a_inv, inv_res, inv_valid);
 
     parameter STEP_3 = 0;
