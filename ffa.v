@@ -8,7 +8,7 @@ module ffa(clk, rst, start, a_i, b_i, out, done);
     wire [255:0] b = {1'b0, b_i}; 
     parameter [255:0] p = {1'b1, 255'b0} - 19;
 
-    parameter CYCLE_1 = 0, CYCLE_2 = 1, CYCLE_3 = 2, CYCLE_4 = 3, CYCLE_5 = 4, CYCLE_6 = 5;
+    parameter INIT = 0, CYCLE_1 = 1, CYCLE_2 = 2, CYCLE_3 = 3, CYCLE_4 = 4, CYCLE_5 = 5;
 
     reg c_in, bo_in;
     wire c_out, bo_out;
@@ -26,7 +26,7 @@ module ffa(clk, rst, start, a_i, b_i, out, done);
 
     always@(posedge clk or posedge rst) begin
         if(rst) begin
-             state <= CYCLE_1;
+             state <= INIT;
              done <= 0;
              s <= 256'b0; 
              d <= 256'b0; 
@@ -35,17 +35,17 @@ module ffa(clk, rst, start, a_i, b_i, out, done);
         else begin
 
             case(state) 
-                CYCLE_1: begin
+                INIT: begin
                     done <= 0;
                     if(start) begin
                         a_in <= a[63:0];
                         b_in <= b[63:0];
                         c_in <= 0;
-                         state <= CYCLE_2;
+                         state <= CYCLE_1;
                     end
                 end
 
-                CYCLE_2: begin
+                CYCLE_1: begin
                     s[63:0] <= add_out;
                     sum_in <= add_out;
                     p_in <= p[63:0];
@@ -53,10 +53,10 @@ module ffa(clk, rst, start, a_i, b_i, out, done);
                     b_in <= b[127:64];
                     c_in <= c_out;
                     bo_in <= 0;
-                    state <= CYCLE_3;
+                    state <= CYCLE_2;
                 end
 
-                CYCLE_3: begin
+                CYCLE_2: begin
                     s[127:64] <= add_out;
                     d[63:0] <= sub_out;
                     sum_in <= add_out;
@@ -65,10 +65,10 @@ module ffa(clk, rst, start, a_i, b_i, out, done);
                     b_in <= b[191:128];
                     c_in <= c_out;
                     bo_in <= bo_out;
-                    state <= CYCLE_4;
+                    state <= CYCLE_3;
                 end
 
-                CYCLE_4: begin
+                CYCLE_3: begin
                     s[191:128] <= add_out;
                     d[127:64] <= sub_out;
                     sum_in <= add_out;
@@ -77,22 +77,22 @@ module ffa(clk, rst, start, a_i, b_i, out, done);
                     b_in <= b[255:192];
                     c_in <= c_out;
                     bo_in <= bo_out;
-                    state <= CYCLE_5;
+                    state <= CYCLE_4;
                 end
 
-                CYCLE_5: begin
+                CYCLE_4: begin
                     s[255:192] <= add_out;
                     d[191:128] <= sub_out;
                     sum_in <= add_out;
                     p_in <= p[255:192];
                     c_in <= c_out;
                     bo_in <= bo_out;
-                    state <= CYCLE_6;
+                    state <= CYCLE_5;
                 end
 
-                CYCLE_6: begin
+                CYCLE_5: begin
                     d[255:192] <= sub_out;
-                    state <= CYCLE_1;
+                    state <= INIT;
                     done <= 1;
                 end
 

@@ -17,66 +17,73 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
     reg [254:0] t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14;
 
 
-    reg [254:0] a_add, b_add;
-    reg [254:0] a_sub, b_sub;
-    reg [254:0] a_mul, b_mul;
+    wire [254:0] a_add, b_add;
+    wire [254:0] a_sub, b_sub;
+    wire [254:0] a_mul, b_mul;
     reg [254:0] a_inv;
 
-    wire [254:0] add_res;
-    wire [254:0]  sub_res, mul_res, inv_res;
+    wire [254:0] add_res, sub_res, mul_res, inv_res;
     wire add_valid, sub_valid, mul_valid, inv_valid;    
 
 
+    reg [1:0] sel_add, sel_sub;
+    reg [3:0] sel_mul;
+
+    four_to_one_mux muxa_add(X2, X3, t8, t7, a_add, sel_add);
+    four_to_one_mux muxb_add(Z2, Z3, t9, t13, b_add, sel_add);
+
+    four_to_one_mux muxa_sub(X2, X3, t6, t8, a_sub, sel_sub);
+    four_to_one_mux muxb_sub(Z2, Z3, t7, t9, b_sub, sel_sub);
+
+    eleven_to_one_mux muxa_mul(t1, t2, t4, t3, t6, 255'd121666, t10, t11, X1, t5, X2, a_mul, sel_mul);
+    eleven_to_one_mux muxb_mul(t1, t2, t1, t2, t7, t5, t10, t11, t12, t14, Z2, b_mul, sel_mul);
+    
     ffm multiplier(clk, rst, start_mul, a_mul, b_mul, mul_res, mul_valid);
     ffa adder(clk, rst, start_add, a_add, b_add, add_res, add_valid);
     ffs subtractor(clk, rst, start_sub, a_sub, b_sub, sub_res, sub_valid);
     ffi inversion(clk, rst, a_inv, inv_res, inv_valid);
 
-    parameter STEP_3 = 0;
-    parameter STEP_7A = 1;
-    parameter WAIT_STEP_7A = 2;
-    parameter STEP_7B = 3;
-    parameter WAIT_STEP_7B = 4;
-    parameter SUB_T6_T7 = 5;
-    parameter STEP_9A = 6;
-    parameter WAIT_STEP_9A = 7;
-    parameter STEP_9B = 8;
-    parameter WAIT_STEP_9B = 9;
-    parameter STEP_10 = 10;
-    parameter WAIT_STEP_10 = 11; 
-    parameter STEP_11A = 12;
-    parameter WAIT_STEP_11A = 13; 
-    parameter STEP_11B = 14;
-    parameter WAIT_STEP_11B  = 15; 
-    parameter STEP_12 = 16;
-    parameter WAIT_STEP_12  = 17; 
-    parameter STEP_13A = 18;
-    parameter WAIT_STEP_13A  = 19; 
-    parameter STEP_13B= 20;
-    parameter WAIT_STEP_13B = 21; 
-    parameter STEP_14 = 22;
-    parameter OUT = 23;
-    parameter STEP_5 = 24;
-    parameter WAIT_STEP_5 = 25;
-    parameter STEP_6 = 26;
-    parameter WAIT_STEP_6 = 27;
-    parameter STEP_8 = 28;
-    parameter WAIT_STEP_8 = 29;
-    parameter STEP_4 = 30;
-    parameter STEP_15A = 31;
-    parameter WAIT_STEP_15A = 32;
-    parameter STEP_15B = 33;
-    parameter WAIT_STEP_15B = 34;
-    
+    parameter INIT = 0;
+    parameter STEP_1 = 1;
+    parameter WAIT_STEP_1 = 2;
+    parameter STEP_2 = 3;
+    parameter WAIT_STEP_2 = 4;
+    parameter STEP_3 = 5;
+    parameter WAIT_STEP_3 = 6;
+    parameter STEP_4 = 7;
+    parameter WAIT_STEP_4 =8;
+    parameter STEP_5 = 9;
+    parameter WAIT_STEP_5 = 10; 
+    parameter STEP_6 = 11;
+    parameter WAIT_STEP_6 = 12; 
+    parameter STEP_7 = 13;
+    parameter WAIT_STEP_7  = 14; 
+    parameter STEP_8 = 15;
+    parameter WAIT_STEP_8  = 16; 
+    parameter STEP_9 = 17;
+    parameter WAIT_STEP_9  = 18; 
+    parameter STEP_10= 19;
+    parameter WAIT_STEP_10 = 20; 
+    parameter STEP_11 = 21;
+    parameter WAIT_STEP_11 = 22;
+    parameter STEP_12 = 23;
+    parameter WAIT_STEP_12 = 24;
+    parameter STEP_13 = 25;
+    parameter WAIT_STEP_13 = 26;
+    parameter STEP_14 = 27;
+    parameter WAIT_STEP_14 = 28;
+    parameter STEP_15 = 29;
+    parameter WAIT_STEP_15 = 30;
+    parameter OUT = 31;
 
     reg [5:0] state;
     reg [7:0] i;
     reg c;
 
     always @ (posedge clk or posedge rst) begin
-        // $display("%d", state);
         if(rst) begin
-            state <= STEP_3;
+            sel_add <= 0; sel_mul<= 0; sel_sub <=0;
+            state <= INIT;
             X1 <= x_p;
             X2 <= 1;
             Z2 <= 0;
@@ -90,280 +97,241 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
 
         else begin
             case (state) 
-                STEP_3: begin
+                INIT: begin
                     $display("%d", i);
                     done <= 0;
                     c <= k_padded[i+1]^k_padded[i];
-                    state <= STEP_4;
+                    state <= STEP_1;
                 end
 
-                STEP_4: begin
+                STEP_1: begin
                     if(c) begin
                         X2 <= X3;
                         X3 <= X2;
                         Z2 <= Z3;
                         Z3 <= Z2;
                     end
-                    state <= STEP_5;
+                    state <= STEP_2;
+                end
+
+                STEP_2: begin
+                    sel_add <= 2'b00;
+                    sel_sub <= 2'b00;
+                    start_add<= 1;   
+                    start_sub<= 1; 
+                    state <= WAIT_STEP_2;
+                end
+
+                WAIT_STEP_2: begin
+                    start_add <= 0;   
+                    start_sub <= 0;   
+                    if (add_valid) begin            //addition and subtraction take equal time so choose either
+                        t1 <= add_res;
+                        t2 <= sub_res;
+                        state <= STEP_3;
+                    end
+                end
+                
+                STEP_3: begin
+                    sel_add <= 2'b01;
+                    sel_sub <= 2'b01;
+                    sel_mul <= 4'b0000;
+                    start_add<= 1; 
+                    start_mul <= 1;
+                    start_sub<= 1;    
+                    state <= WAIT_STEP_3;
+                end
+
+                WAIT_STEP_3: begin
+                    start_add <= 0; 
+                    start_sub <= 0;  
+                    start_mul <= 0; 
+                    if (mul_valid) begin  
+                        t3 <= add_res;
+                        t4 <= sub_res;
+                        t6 <= mul_res;
+                        state <= STEP_4;
+                    end
+                end
+
+                STEP_4: begin
+                    sel_mul <= 4'b0001;
+                    start_mul<= 1;    
+                    state    <= WAIT_STEP_4;
+                end
+
+                WAIT_STEP_4: begin
+                    start_mul<= 0;  
+                    if (mul_valid) begin  
+                        t7 <= mul_res;
+                        state <= STEP_5;
+                    end
                 end
 
                 STEP_5: begin
-                    a_add <= X2;
-                    b_add <= Z2;
-                    start_add<= 1;   
-                    a_sub <= X2;
-                    b_sub <= Z2;
+                    sel_sub <= 2'b10;
                     start_sub<= 1; 
+                    sel_mul <= 4'b0010;
+                    start_mul<= 1;      
                     state <= WAIT_STEP_5;
                 end
 
                 WAIT_STEP_5: begin
-                    start_add <= 0;   
-                    start_sub <= 0;   
-                    if (add_valid) begin  
-                        t1 <= add_res;
-                        t2 <= sub_res;
-                        state <= STEP_6;
-                    end
-                end
-                
-                STEP_6: begin
-                    a_add <= X3;
-                    b_add <= Z3;
-                    start_add<= 1; 
-                    a_sub <= X3;
-                    b_sub <= Z3;
-                    start_sub<= 1;    
-                    state <= WAIT_STEP_6;
-                end
-
-                WAIT_STEP_6: begin
-                    start_add<= 0; 
-                    start_sub <= 0;  
-                    if (add_valid) begin  
-                        t3 <= add_res;
-                        t4 <= sub_res;
-                        state <= STEP_7A;
-                    end
-                end
-
-                STEP_7A: begin
-                    a_mul    <= t1;
-                    b_mul    <= t1;
-                    start_mul<= 1;    
-                    state    <= WAIT_STEP_7A;
-                end
-
-                WAIT_STEP_7A: begin
-                    start_mul<= 0;  
-                    if (mul_valid) begin  
-                        t6    <= mul_res;
-                        state <= STEP_7B;
-                    end
-                end
-
-                STEP_7B: begin
-                    a_mul    <= t2;
-                    b_mul    <= t2;
-                    start_mul<= 1;    
-                    state    <= WAIT_STEP_7B;
-                end
-
-                WAIT_STEP_7B: begin
-                    start_mul<= 0;  
-                    if (mul_valid) begin  
-                        t7 <= mul_res;
-                        state <= STEP_8;
-                    end
-                end
-
-                STEP_8: begin
-                    a_sub <= t6;
-                    b_sub <= t7;
-                    start_sub<= 1; 
-                    a_mul <= t4;
-                    b_mul <= t1;
-                    start_mul<= 1;      
-                    state <= WAIT_STEP_8;
-                end
-
-                WAIT_STEP_8: begin
                     start_sub<= 0;   
                     start_mul<= 0;   
                     if (mul_valid) begin        //multiplication always faster than subtraction
                         t5 <= sub_res;
                         t8 <= mul_res;
-                        state <= STEP_9A;
+                        state <= STEP_6;
                     end
                 end
 
-                STEP_9A: begin
-                    a_mul <= t3;
-                    b_mul <= t2;
+                STEP_6: begin
+                    sel_mul <= 4'b0011;
                     start_mul<= 1; 
-                    state <= WAIT_STEP_9A;
+                    state <= WAIT_STEP_6;
                 end
 
-                WAIT_STEP_9A: begin
+                WAIT_STEP_6: begin
                     start_mul<= 0;   
                     if (mul_valid) begin  
                         t9 <= mul_res;
-                        state <= STEP_9B;
+                        state <= STEP_7;
                     end
                 end
 
-                STEP_9B: begin
-                    a_add <= t8;
-                    b_add <= t9;          
+                STEP_7: begin
+                    sel_add <= 2'b10;
+                    sel_sub <= 2'b11;          
                     start_add<= 1;     
-                    state <= WAIT_STEP_9B;
+                    start_sub<= 1;     
+                    start_mul<= 1;     
+                    sel_mul <= 4'b0100;
+                    state <= WAIT_STEP_7;
                 end
 
-                WAIT_STEP_9B: begin
+                WAIT_STEP_7: begin
                     start_add<= 0; 
-                    if (add_valid) begin  
+                    start_sub<= 0; 
+                    start_mul<= 0; 
+                    if (mul_valid) begin  
                         t10 <= add_res;
+                        t11 <= sub_res;
+                        X2 <= mul_res;
+                        state <= STEP_8;
+                    end
+                end
+
+                STEP_8: begin
+                    start_mul<= 1;    
+                    sel_mul <= 4'b0101;
+                    state <= WAIT_STEP_8;
+                end
+
+                WAIT_STEP_8: begin
+                    start_mul<= 0;     
+                    if (mul_valid) begin  
+                        t13 <= mul_res;
+                        state <= STEP_9;
+                    end
+                end
+
+                STEP_9: begin
+                    sel_mul <= 4'b0110;
+                    sel_add <= 2'b11;
+                    start_add<= 1;
+                    start_mul <= 1;     
+                    state <= WAIT_STEP_9;
+                end
+
+                WAIT_STEP_9: begin
+                    start_mul<= 0; 
+                    start_add <= 0;   
+                    if (mul_valid) begin  
+                        X3 <= mul_res;
+                        t14 <= add_res;
                         state <= STEP_10;
                     end
                 end
 
                 STEP_10: begin
-                    a_sub <= t8;
-                    b_sub <= t9;
-                    start_sub<= 1;  
-                    a_mul <= t10;
-                    b_mul <= t10;
-                    start_mul<= 1;    
+                    sel_mul <= 4'b0111;
+                    start_mul<= 1;      
                     state <= WAIT_STEP_10;
                 end
 
                 WAIT_STEP_10: begin
-                    start_sub<= 0;  
-                    start_mul<= 0;     
-                    if (mul_valid) begin  
-                        t11 <= sub_res;
-                        X3 <= mul_res;
-                        state <= STEP_11A;
-                    end
-                end
-
-                STEP_11A: begin
-                    a_mul <= t11;
-                    b_mul <= t11;
-                    start_mul<= 1;    
-                    state <= WAIT_STEP_11A;
-                end
-
-                WAIT_STEP_11A: begin
-                    start_mul<= 0;    
+                    start_mul<= 0;  
                     if (mul_valid) begin  
                         t12 <= mul_res;
-                        state <= STEP_11B;
+                        state <= STEP_11;
                     end
                 end
 
-                STEP_11B: begin
-                    a_mul <= t5;
-                    b_mul <= 255'd121666;
+                STEP_11: begin
+                    sel_mul <= 4'b1000;
                     start_mul<= 1;    
-                    state <= WAIT_STEP_11B;
+                    state <= WAIT_STEP_11;
                 end
 
-                WAIT_STEP_11B: begin
+                WAIT_STEP_11: begin
                     start_mul<= 0;    
                     if (mul_valid) begin  
-                        t13 <= mul_res;
+                        Z3 <= mul_res;
                         state <= STEP_12;
                     end
                 end
 
                 STEP_12: begin
-                    a_mul <= t6;
-                    b_mul <= t7;
+                    sel_mul <= 4'b1001;
                     start_mul<= 1;    
-                    a_add <= t7;
-                    b_add <= t13;
-                    start_add<= 1;  
                     state <= WAIT_STEP_12;
                 end
 
                 WAIT_STEP_12: begin
-                    start_mul<= 0;  
-                    start_add<= 0;  
-                    if (mul_valid) begin  
-                        X2 <= mul_res;
-                        t14 <= add_res;
-                        state <= STEP_13A;
-                    end
-                end
-
-                STEP_13A: begin
-                    a_mul <= X1;
-                    b_mul <= t12;
-                    start_mul<= 1;    
-                    state <= WAIT_STEP_13A;
-                end
-
-                WAIT_STEP_13A: begin
-                    start_mul<= 0;    
-                    if (mul_valid) begin  
-                        Z3 <= mul_res;
-                        state <= STEP_13B;
-                    end
-                end
-
-                STEP_13B: begin
-                    a_mul <= t5;
-                    b_mul <= t14;
-                    start_mul<= 1;    
-                    state <= WAIT_STEP_13B;
-                end
-
-                WAIT_STEP_13B: begin
                     start_mul<= 0;    
                     if (mul_valid) begin  
                         Z2 <= mul_res;
+                        state <= STEP_13;
+                    end
+                end
+
+                STEP_13: begin 
+                    // $display("%d", t1); $display("%d", t2); $display("%d", t3); $display("%d", t4); $display("%d", t5); $display("%d", t6); $display("%d", t7); $display("%d", t8); $display("%d", t9); $display("%d", t10); $display("%d", t11); $display("%d", t12); $display("%d", t13); $display("%d", t14); $display("%d", X1); $display("%d", X2); $display("%d", X3); $display("%d", Z2); $display("%d", Z3); $display("\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+                    if(i == 0) begin
+                        if(k[0]) begin
+                            X2 <= X3;
+                            X3 <= X2;
+                            Z2 <= Z3;
+                            Z3 <= Z2;
+                        end
                         state <= STEP_14;
                     end
-                end
-
-                STEP_14: begin 
-                    // $display("%d", t1); $display("%d", t2); $display("%d", t3); $display("%d", t4); $display("%d", t5); $display("%d", t6); $display("%d", t7); $display("%d", t8); $display("%d", t9); $display("%d", t10); $display("%d", t11); $display("%d", t12); $display("%d", t13); $display("%d", t14); $display("%d", X1); $display("%d", X2); $display("%d", X3); $display("%d", Z2); $display("%d", Z3); $display("\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-                        if(i == 0) begin
-                            if(k[0]) begin
-                                X2 <= X3;
-                                X3 <= X2;
-                                Z2 <= Z3;
-                                Z3 <= Z2;
-                            end
-                            state <= STEP_15A;
-                        end
-                        else begin 
-                            i = i - 1;
-                            state <= STEP_3;
-                        end
-                end
-
-                STEP_15A: begin
-                    a_inv <= Z2;
-                    state <= WAIT_STEP_15A;
-                end
-
-                WAIT_STEP_15A: begin
-                    if(inv_valid) begin
-                    Z2 <= inv_res;
-                    state <= STEP_15B;
+                    else begin 
+                        i = i - 1;
+                        state <= INIT;
                     end
                 end
 
-                STEP_15B: begin
-                    a_mul <= X2;
-                    b_mul <= Z2;
-                    start_mul<= 1;    
-                    state <= WAIT_STEP_15B;
+                STEP_14: begin
+                    a_inv <= Z2;
+                    state <= WAIT_STEP_14;
                 end
 
-                WAIT_STEP_15B: begin
+                WAIT_STEP_14: begin
+                    if(inv_valid) begin
+                    Z2 <= inv_res;
+                    state <= STEP_15;
+                    end
+                end
+
+                STEP_15: begin
+                    sel_mul <= 4'b1010;
+                    start_mul<= 1;    
+                    state <= WAIT_STEP_15;
+                end
+
+                WAIT_STEP_15: begin
                     start_mul<= 0;    
                     if (mul_valid) begin  
                         x_q <= mul_res;
@@ -372,8 +340,8 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
                 end
 
                 OUT: begin 
-                        done <= 1;
-                        state <= OUT;
+                    done <= 1;
+                    state <= OUT;
                 end
             endcase
         end
