@@ -1,4 +1,7 @@
+////////////////////////////////////////////  Finite Field Adder based on 64 bit adder, subtractor ///////////////////////////////////////////////////
+
 module ffa(clk, rst, start, a_i, b_i, out, done);
+
     input clk, rst, start;
     input [254:0] a_i, b_i;
     output [254:0] out;
@@ -103,6 +106,5 @@ module ffa(clk, rst, start, a_i, b_i, out, done);
     end
 
 assign out = (bo_out)? s[254:0] : d[254:0];
-
 
 endmodule

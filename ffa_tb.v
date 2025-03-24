@@ -8,50 +8,41 @@ module tb_ffa;
   wire        done;
   integer count;  
 
-  ffaa uut (
-    .clk   (clk),
-    .rst   (rst),
-    .start (start),
-    .a     (a),
-    .b     (b),
-    .out   (out),
-    .done  (done)
-  );
+  ffa uut (clk, rst, start, a, b, out, done);
 
   initial begin
-    clk = 0;
-    forever #5 clk = ~clk;
+    clk <= 0;
+    forever #5 clk <= ~clk;
   end
 
   initial begin
-    rst   = 1;
-    start = 0;
-    a     = 256'h0;
-    b     = 256'h0;
-    count = 0; 
+    rst <= 1;
+    start <= 0;
+    a <= 256'h0;
+    b <= 256'h0;
+    count <= 0; 
     
     #15;
-    rst = 0;
+    rst <= 0;
     #10;
     
-    a = 45965849458578823337285628114947185621072782472466027602082789798859530730302;
-    b = 45965849458578823337785628114947185621072782472466027602082789798859530730302;
+    a <= 45965849458578823337285628114947185621072782472466027602082789798859530730302;
+    b <= 45965849458578823337785628114947185621072782472466027602082789798859530730302;
     
-    start = 1;
+    start <= 1;
     #10;
-    start = 0;
+    start <= 0;
 
-    count = 0;
+    count <= 0;
     while (done == 0) begin
       @(posedge clk);
-      count = count + 1;
+      count <= count + 1;
     end
     
-    $display("Test completed at time %0t", $time);
-    $display("Clock cycles taken: %d", count);
-    $display("Input a : %h", a);
-    $display("Input b : %h", b);
-    $display("Output  : %h", out);
+    $display("Clock cycles: %d", count);
+    $display("a : %h", a);
+    $display("b : %h", b);
+    $display("Output : %h", out);
     
     #50;
     $finish;

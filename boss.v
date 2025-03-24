@@ -1,49 +1,50 @@
-module scalar_multiplication(k, x_p, clk, rst, x_q, done);
+////////////////////////////////////////////////Scalar multiplication for curve 25519 using Montgomery Ladder////////////////////////////////////////////////
+
+module scalar_multiplication(clk, rst, k, x_p, x_q, done);
 
     input [254:0] k, x_p;
     input clk, rst;
     output reg [254:0] x_q;
-
     output reg done;
 
-    wire [255:0] k_padded = {1'b0, k};
+    wire [255:0] k_padded = {1'b0, k};              //set k_255 = 0
 
-    reg start_mul;
+    reg start_mul;                                  //start signals for arithmetic
     reg start_add;
     reg start_sub;
     
 
-    reg [254:0] X1, X2, X3, Z2, Z3;
-    reg [254:0] t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14;
+    reg [254:0] X1, X2, X3, Z2, Z3;                             //store registers
+    reg [254:0] t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14;            //temporary register
 
 
-    wire [254:0] a_add, b_add;
+    wire [254:0] a_add, b_add;              //inputs to arithmetic modules
     wire [254:0] a_sub, b_sub;
     wire [254:0] a_mul, b_mul;
     reg [254:0] a_inv;
 
-    wire [254:0] add_res, sub_res, mul_res, inv_res;
-    wire add_valid, sub_valid, mul_valid, inv_valid;    
+    wire [254:0] add_res, sub_res, mul_res, inv_res;            //results of arithmetic operations
+    wire add_valid, sub_valid, mul_valid, inv_valid;            //valid signals from arithmetic modules to jump to next cycles
 
 
-    reg [1:0] sel_add, sel_sub;
+    reg [1:0] sel_add, sel_sub;                                 //select signals for all multiplexors
     reg [3:0] sel_mul;
 
-    four_to_one_mux muxa_add(X2, X3, t8, t7, a_add, sel_add);
-    four_to_one_mux muxb_add(Z2, Z3, t9, t13, b_add, sel_add);
+    four_to_one_mux muxa_add(X2, X3, t8, t7, a_add, sel_add);       //1st input to adder from mux
+    four_to_one_mux muxb_add(Z2, Z3, t9, t13, b_add, sel_add);      //2nd input to adder from mux
 
-    four_to_one_mux muxa_sub(X2, X3, t6, t8, a_sub, sel_sub);
-    four_to_one_mux muxb_sub(Z2, Z3, t7, t9, b_sub, sel_sub);
+    four_to_one_mux muxa_sub(X2, X3, t6, t8, a_sub, sel_sub);       //1st input to subtractor from mux
+    four_to_one_mux muxb_sub(Z2, Z3, t7, t9, b_sub, sel_sub);       //2nd input to subtractor from mux
 
-    eleven_to_one_mux muxa_mul(t1, t2, t4, t3, t6, 255'd121666, t10, t11, X1, t5, X2, a_mul, sel_mul);
-    eleven_to_one_mux muxb_mul(t1, t2, t1, t2, t7, t5, t10, t11, t12, t14, Z2, b_mul, sel_mul);
+    eleven_to_one_mux muxa_mul(t1, t2, t4, t3, t6, 255'd121666, t10, t11, X1, t5, X2, a_mul, sel_mul);      //1st input to multiplier from mux
+    eleven_to_one_mux muxb_mul(t1, t2, t1, t2, t7, t5, t10, t11, t12, t14, Z2, b_mul, sel_mul);             //2nd input to multiplier from mux
     
-    ffm multiplier(clk, rst, start_mul, a_mul, b_mul, mul_res, mul_valid);
+    ffm multiplier(clk, rst, start_mul, a_mul, b_mul, mul_res, mul_valid);          //arithmetic modules
     ffa adder(clk, rst, start_add, a_add, b_add, add_res, add_valid);
     ffs subtractor(clk, rst, start_sub, a_sub, b_sub, sub_res, sub_valid);
     ffi inversion(clk, rst, a_inv, inv_res, inv_valid);
 
-    parameter INIT = 0;
+    parameter INIT = 0;                                         //FSM state declarations
     parameter STEP_1 = 1;
     parameter WAIT_STEP_1 = 2;
     parameter STEP_2 = 3;
@@ -76,9 +77,9 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
     parameter WAIT_STEP_15 = 30;
     parameter OUT = 31;
 
-    reg [5:0] state;
-    reg [7:0] i;
-    reg c;
+    reg [5:0] state;                
+    reg [7:0] i;                //iteration variable
+    reg c;                      //c variable for cswap
 
     always @ (posedge clk or posedge rst) begin
         if(rst) begin
@@ -105,7 +106,7 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
                 end
 
                 STEP_1: begin
-                    if(c) begin
+                    if(c) begin             //cswap
                         X2 <= X3;
                         X3 <= X2;
                         Z2 <= Z3;
@@ -297,9 +298,8 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
                 end
 
                 STEP_13: begin 
-                    // $display("%d", t1); $display("%d", t2); $display("%d", t3); $display("%d", t4); $display("%d", t5); $display("%d", t6); $display("%d", t7); $display("%d", t8); $display("%d", t9); $display("%d", t10); $display("%d", t11); $display("%d", t12); $display("%d", t13); $display("%d", t14); $display("%d", X1); $display("%d", X2); $display("%d", X3); $display("%d", Z2); $display("%d", Z3); $display("\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-                    if(i == 0) begin
-                        if(k[0]) begin
+                    if(i == 0) begin                //exit if all 255 iterations done
+                        if(k[0]) begin          //cswap
                             X2 <= X3;
                             X3 <= X2;
                             Z2 <= Z3;
@@ -313,13 +313,13 @@ module scalar_multiplication(k, x_p, clk, rst, x_q, done);
                     end
                 end
 
-                STEP_14: begin
+                STEP_14: begin              
                     a_inv <= Z2;
                     state <= WAIT_STEP_14;
                 end
 
                 WAIT_STEP_14: begin
-                    if(inv_valid) begin
+                    if(inv_valid) begin             //inversion
                     Z2 <= inv_res;
                     state <= STEP_15;
                     end

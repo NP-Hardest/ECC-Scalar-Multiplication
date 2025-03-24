@@ -1,10 +1,8 @@
-module four_to_one_mux(a, b, c, d, out, sel);
+module four_to_one_mux(a, b, c, d, out, sel);               //4x1 mux for adder, subtractor
 
     input [254:0] a, b , c, d;
     output reg [254:0] out;
     input [1:0] sel;
-
-    
     always@(*) begin
         case(sel) 
             2'b00: out <= a;
@@ -16,13 +14,11 @@ module four_to_one_mux(a, b, c, d, out, sel);
     end
 endmodule
 
-module eleven_to_one_mux(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, out, sel);
+module eleven_to_one_mux(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, out, sel);   
 
-    input [254:0] a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11;
+    input [254:0] a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11;         //11x1 mux for multiplier
     output reg [254:0] out;
     input [3:0] sel;
-
-    
     always@(*) begin
         case(sel) 
             4'b0000: out <= a1;

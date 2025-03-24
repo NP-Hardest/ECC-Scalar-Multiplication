@@ -5,8 +5,8 @@ def scalar_to_bits(k):
     k_bin = bin(k)[2:].zfill(255)  # Pad to 255 bits
     return [int(b) for b in k_bin]
 
-def curve25519_montgomery_ladder(k, x_p):
-    p = 2**255 - 19
+def curve25519_montgomery_ladder(k, x_p):               #simple python script simulating algorithm 2 from paper
+    p = 2**255 - 19     
     k_bits = scalar_to_bits(k)
 
     X1 = x_p % p
@@ -52,8 +52,8 @@ def curve25519_montgomery_ladder(k, x_p):
     x_q = (X2 * Z2_inv) % p
     return x_q
 
-x_p = 27217333943943358250627699745851211085341687489113481307182141596657422383470
-k = 7187934484075914689806751868628530730776826202169948535253281198454376860578
+x_p = 9
+k = 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed+1
 
 result = curve25519_montgomery_ladder(k, x_p)
 

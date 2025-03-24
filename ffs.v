@@ -1,4 +1,7 @@
+////////////////////////////////////////////  Finite Field Subtractor based on 64 bit adder, subtractor ///////////////////////////////////////////////////
+
 module ffs(clk, rst, start, a_i, b_i, out, done);
+
     input clk, rst, start;
     input [254:0] a_i, b_i;
     output [254:0] out;
