@@ -52,8 +52,10 @@ def curve25519_montgomery_ladder(k, x_p):               #simple python script si
     x_q = (X2 * Z2_inv) % p
     return x_q
 
-x_p = 9
-k = 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed+1
+
+x_p = 0
+
+k = 0
 
 result = curve25519_montgomery_ladder(k, x_p)
 

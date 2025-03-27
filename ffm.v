@@ -90,6 +90,8 @@ module ffm (clk, rst, start, a, b, result, valid);
                     valid <= 1;
                     state <= IDLE;
                 end
+
+                default: state <=IDLE;
             endcase
         end
     end

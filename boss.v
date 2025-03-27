@@ -9,9 +9,7 @@ module scalar_multiplication(clk, rst, k, x_p, x_q, done);
 
     wire [255:0] k_padded = {1'b0, k};              //set k_255 = 0
 
-    reg start_mul;                                  //start signals for arithmetic
-    reg start_add;
-    reg start_sub;
+    reg start_mul, start_add, start_sub, start_inv;                         //start signals for arithmetic
     
 
     reg [254:0] X1, X2, X3, Z2, Z3;                             //store registers
@@ -42,7 +40,7 @@ module scalar_multiplication(clk, rst, k, x_p, x_q, done);
     ffm multiplier(clk, rst, start_mul, a_mul, b_mul, mul_res, mul_valid);          //arithmetic modules
     ffa adder(clk, rst, start_add, a_add, b_add, add_res, add_valid);
     ffs subtractor(clk, rst, start_sub, a_sub, b_sub, sub_res, sub_valid);
-    ffi inversion(clk, rst, a_inv, inv_res, inv_valid);
+    ffi inversion(clk, rst, start_inv, a_inv, inv_res, inv_valid);
 
     parameter INIT = 0;                                         //FSM state declarations
     parameter STEP_1 = 1;
@@ -316,9 +314,11 @@ module scalar_multiplication(clk, rst, k, x_p, x_q, done);
                 STEP_14: begin              
                     a_inv <= Z2;
                     state <= WAIT_STEP_14;
+                    start_inv <= 1;
                 end
 
                 WAIT_STEP_14: begin
+                    start_inv <= 0;
                     if(inv_valid) begin             //inversion
                     Z2 <= inv_res;
                     state <= STEP_15;
@@ -343,6 +343,9 @@ module scalar_multiplication(clk, rst, k, x_p, x_q, done);
                     done <= 1;
                     state <= OUT;
                 end
+
+                default: state <=INIT;
+
             endcase
         end
     end

@@ -98,7 +98,7 @@ module ffa(clk, rst, start, a_i, b_i, out, done);
                     state <= INIT;
                     done <= 1;
                 end
-
+                default: state <=INIT;
             endcase
 
         end

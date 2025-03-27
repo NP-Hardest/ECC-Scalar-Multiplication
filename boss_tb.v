@@ -27,8 +27,8 @@ module tb_scalar_multiplication;
         clk <= 0;
         rst <= 0;
         x_p <= 255'd9;                   // x_p = 9
-        k <= 255'h1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed + 255'd1;        
-        //order +1, taken from https://neuromancer.sk/std/other/Curve25519
+        k <= 255'h1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed +255'd1;        
+        //order + 1, taken from https://neuromancer.sk/std/other/Curve25519
         
         rst <= 1;
         #100;
