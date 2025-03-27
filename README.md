@@ -5,7 +5,7 @@ This repository contains a Verilog implementation of scalar multiplication for *
 ## **Features**  
 
 - **Finite Field Adder/Subtractor**  
-  - Performs addition and subtraction over the prime field used in Curve25519.  
+  - Performs modular addition and subtraction over the prime field used in Curve25519 in **5 clock cycles** using 64 bit modules.  
 
 - **Finite Field Multiplier**  
   - Computes **256-bit multiplication** in **176 clock cycles**.  
