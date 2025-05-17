@@ -1,4 +1,4 @@
-# **ECC Scalar Multiplication on Curve25519 (Verilog)**  
+# **ECC Scalar Multiplication on Curve25519 **  
 
 This repository contains a Verilog implementation of scalar multiplication for **Elliptic Curve Cryptography (ECC)** on **Curve25519**. It includes various finite field arithmetic modules optimized for performance, leading to an efficient implementation of the **Montgomery ladder** algorithm for secure scalar multiplication.  
 
